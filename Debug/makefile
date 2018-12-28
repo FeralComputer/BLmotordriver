@@ -23,6 +23,7 @@ ORDERED_OBJS += \
 "./i2c.obj" \
 "./interrupt.obj" \
 "./main.obj" \
+"./motordriver.obj" \
 "./mpu.obj" \
 "./pcm.obj" \
 "./pmap.obj" \
@@ -156,42 +157,42 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.out \
+BLmotordriver.out \
 
 EXE_OUTPUTS__QUOTED += \
-"driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.out" \
+"BLmotordriver.out" \
 
 BIN_OUTPUTS += \
-driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.hex \
+BLmotordriver.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.hex" \
+"BLmotordriver.hex" \
 
 
 # All Target
 all: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
-	@$(MAKE) --no-print-directory -Onone "driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.out"
+	@$(MAKE) --no-print-directory -Onone "BLmotordriver.out"
 
 # Tool invocations
-driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+BLmotordriver.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: ARM Linker'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.map" --stack_size=512 -i"C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs_linkInfo.xml" --rom_model -o "driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.out" $(ORDERED_OBJS)
+	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"BLmotordriver.map" --stack_size=512 -i"C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/lib" --diag_wrap=off --display_error_number --warn_sections --xml_link_info="BLmotordriver_linkInfo.xml" --rom_model -o "BLmotordriver.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
-driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.hex: $(EXE_OUTPUTS)
+BLmotordriver.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo 'Invoking: ARM Hex Utility'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/bin/armhex"  -o "driverlib_empty_project_from_source_MSP_EXP432P401R_nortos_ccs.hex" $(EXE_OUTPUTS__QUOTED)
+	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.4.LTS/bin/armhex"  -o "BLmotordriver.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "adc14.obj" "aes256.obj" "comp_e.obj" "cpu.obj" "crc32.obj" "cs.obj" "dma.obj" "flash.obj" "fpu.obj" "gpio.obj" "i2c.obj" "interrupt.obj" "main.obj" "mpu.obj" "pcm.obj" "pmap.obj" "pss.obj" "ref_a.obj" "reset.obj" "rtc_c.obj" "spi.obj" "sysctl.obj" "system_msp432p401r.obj" "systick.obj" "timer32.obj" "timer_a.obj" "uart.obj" "wdt_a.obj" "ccs\startup_msp432p401r_ccs.obj" 
-	-$(RM) "adc14.d" "aes256.d" "comp_e.d" "cpu.d" "crc32.d" "cs.d" "dma.d" "flash.d" "fpu.d" "gpio.d" "i2c.d" "interrupt.d" "main.d" "mpu.d" "pcm.d" "pmap.d" "pss.d" "ref_a.d" "reset.d" "rtc_c.d" "spi.d" "sysctl.d" "system_msp432p401r.d" "systick.d" "timer32.d" "timer_a.d" "uart.d" "wdt_a.d" "ccs\startup_msp432p401r_ccs.d" 
+	-$(RM) "adc14.obj" "aes256.obj" "comp_e.obj" "cpu.obj" "crc32.obj" "cs.obj" "dma.obj" "flash.obj" "fpu.obj" "gpio.obj" "i2c.obj" "interrupt.obj" "main.obj" "motordriver.obj" "mpu.obj" "pcm.obj" "pmap.obj" "pss.obj" "ref_a.obj" "reset.obj" "rtc_c.obj" "spi.obj" "sysctl.obj" "system_msp432p401r.obj" "systick.obj" "timer32.obj" "timer_a.obj" "uart.obj" "wdt_a.obj" "ccs\startup_msp432p401r_ccs.obj" 
+	-$(RM) "adc14.d" "aes256.d" "comp_e.d" "cpu.d" "crc32.d" "cs.d" "dma.d" "flash.d" "fpu.d" "gpio.d" "i2c.d" "interrupt.d" "main.d" "motordriver.d" "mpu.d" "pcm.d" "pmap.d" "pss.d" "ref_a.d" "reset.d" "rtc_c.d" "spi.d" "sysctl.d" "system_msp432p401r.d" "systick.d" "timer32.d" "timer_a.d" "uart.d" "wdt_a.d" "ccs\startup_msp432p401r_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

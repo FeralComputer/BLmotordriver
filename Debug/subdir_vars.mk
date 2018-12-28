@@ -22,6 +22,7 @@ C_SRCS += \
 ../i2c.c \
 ../interrupt.c \
 ../main.c \
+../motordriver.c \
 ../mpu.c \
 ../pcm.c \
 ../pmap.c \
@@ -52,6 +53,7 @@ C_DEPS += \
 ./i2c.d \
 ./interrupt.d \
 ./main.d \
+./motordriver.d \
 ./mpu.d \
 ./pcm.d \
 ./pmap.d \
@@ -82,6 +84,7 @@ OBJS += \
 ./i2c.obj \
 ./interrupt.obj \
 ./main.obj \
+./motordriver.obj \
 ./mpu.obj \
 ./pcm.obj \
 ./pmap.obj \
@@ -112,6 +115,7 @@ OBJS__QUOTED += \
 "i2c.obj" \
 "interrupt.obj" \
 "main.obj" \
+"motordriver.obj" \
 "mpu.obj" \
 "pcm.obj" \
 "pmap.obj" \
@@ -142,6 +146,7 @@ C_DEPS__QUOTED += \
 "i2c.d" \
 "interrupt.d" \
 "main.d" \
+"motordriver.d" \
 "mpu.d" \
 "pcm.d" \
 "pmap.d" \
@@ -172,6 +177,7 @@ C_SRCS__QUOTED += \
 "../i2c.c" \
 "../interrupt.c" \
 "../main.c" \
+"../motordriver.c" \
 "../mpu.c" \
 "../pcm.c" \
 "../pmap.c" \
