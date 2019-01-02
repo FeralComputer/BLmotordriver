@@ -41,6 +41,7 @@ PINS pins[NUMBEROFPINS] =
 };
 
 uint16_t numberofpulses;
+uint8_t statechange=true;
 
 
 inline void pwmControl(PINS* pin);
@@ -116,36 +117,67 @@ void TA0_N_IRQHandler(void)
     switch (state)
     {
     case 0:
-        if (!pulsecount)
+        if (statechange)
         {
-            MAP_GPIO_setOutputLowOnPin(pins[0].port, pins[0].pin);
-            MAP_GPIO_setOutputHighOnPin(pins[1].port, pins[1].pin);
+            MAP_GPIO_setOutputLowOnPin(PWMpins[1].port, PWMpins[1].pin);
+            MAP_GPIO_setOutputLowOnPin(pins[1].port, pins[1].pin);
 
-            MAP_GPIO_setOutputLowOnPin(PWMpins[2].port, PWMpins[2].pin);
+            MAP_GPIO_setOutputHighOnPin(pins[0].port,pins[0].pin);
         }
 
-        pwmControl(&PWMpins[state]);
+        pwmControl(&PWMpins[2]);
         break;
     case 1:
-        if (!pulsecount)
+        if (statechange)
         {
-            MAP_GPIO_setOutputLowOnPin(pins[1].port, pins[1].pin);
-            MAP_GPIO_setOutputHighOnPin(pins[2].port, pins[2].pin);
-
+            MAP_GPIO_setOutputLowOnPin(pins[0].port, pins[0].pin);
             MAP_GPIO_setOutputLowOnPin(PWMpins[0].port, PWMpins[0].pin);
+
+            MAP_GPIO_setOutputHighOnPin(pins[1].port, pins[1].pin);
         }
 
-        pwmControl(&PWMpins[state]);
+        pwmControl(&PWMpins[2]);
         break;
     case 2:
-        if (!pulsecount)
+        if (statechange)
         {
             MAP_GPIO_setOutputLowOnPin(pins[2].port, pins[2].pin);
-            MAP_GPIO_setOutputHighOnPin(pins[0].port, pins[0].pin);
+            MAP_GPIO_setOutputLowOnPin(PWMpins[2].port, PWMpins[2].pin);
 
-            MAP_GPIO_setOutputLowOnPin(PWMpins[1].port, PWMpins[1].pin);
+            MAP_GPIO_setOutputHighOnPin(pins[1].port, pins[1].pin);
         }
-        pwmControl(&PWMpins[state]);
+        pwmControl(&PWMpins[0]);
+        break;
+    case 3:
+        if (statechange)
+        {
+            MAP_GPIO_setOutputLowOnPin(pins[1].port, pins[1].pin);
+            MAP_GPIO_setOutputLowOnPin(PWMpins[1].port, PWMpins[1].pin);
+
+            MAP_GPIO_setOutputHighOnPin(pins[2].port, pins[2].pin);
+        }
+        pwmControl(&PWMpins[0]);
+        break;
+    case 4:
+        if (statechange)
+        {
+            MAP_GPIO_setOutputLowOnPin(pins[0].port, pins[0].pin);
+            MAP_GPIO_setOutputLowOnPin(PWMpins[0].port, PWMpins[0].pin);
+
+            MAP_GPIO_setOutputHighOnPin(pins[2].port, pins[2].pin);
+        }
+        pwmControl(&PWMpins[1]);
+        break;
+    case 5:
+        if (statechange)
+        {
+            MAP_GPIO_setOutputLowOnPin(pins[2].port, pins[2].pin);
+            MAP_GPIO_setOutputLowOnPin(PWMpins[2].port, PWMpins[2].pin);
+
+            MAP_GPIO_setOutputHighOnPin(pins[0].port, pins[0].pin);
+        }
+        pwmControl(&PWMpins[1]);
+
         break;
     default:
 
@@ -198,9 +230,18 @@ inline void pwmControl(PINS* pin)
         }
         pulsecount++;
     }
+    if(statechange)
+    {
+        statechange=false;
+    }
 
     //logic for state change and currently motor ramping
-    if (pulsecount >= numberofpulses)
+    if(isEven(state)&&(pulsecount>=(numberofpulses/2)))
+    {
+        state++;
+        statechange=true;
+    }
+    else if ((pulsecount >= numberofpulses))
     {
         //TODO: put in its own function!!!
         //speed up motor
@@ -238,6 +279,7 @@ inline void pwmControl(PINS* pin)
         dutycycle = INITIALDUTYCYCLE;
         dutycyclestep = DEFAULTDUTYCYCLESTEP;
         state++;
+        statechange=true;
         if (state >= MAXSTATES)
         {
             state = 0;

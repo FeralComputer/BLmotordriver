@@ -15,8 +15,8 @@
 #include <stdbool.h>
 
 #define TIMER_A_PERIOD 32768
-#define MAXSTATES 3
-#define MINPULSECOUNT 50
+#define MAXSTATES 6
+#define MINPULSECOUNT 40
 #define MAXPULSECOUNT 500
 #define NUMBEROFPINS 3
 #define MAXDUTYCYCLE 100
