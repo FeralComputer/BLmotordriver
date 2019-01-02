@@ -16,25 +16,32 @@
 
 #define TIMER_A_PERIOD 32768
 #define MAXSTATES 3
-#define MAXPULSECOUNT 30
+#define MINPULSECOUNT 50
+#define MAXPULSECOUNT 500
 #define NUMBEROFPINS 3
 #define MAXDUTYCYCLE 100
 #define isOdd(x) ((x)&0x01)
 #define isEven(x) !isOdd(x)
-#define MAXPULSEWIDTH 1700
-#define MINPULSEWIDTH 30000
+#define PULSEWIDTH 1500
 #define abs(x) ((x)>0?(x):-(x))
-#define DEFAULTDUTYCYCLESTEP 10
+#define DEFAULTDUTYCYCLESTEP 5
 #define DEBUG 0
-#define INITIALDUTYCYCLE 10
+#define INITIALDUTYCYCLE 5
 #define MINDELTAPULSEWIDTHSTEP 100
+#define CYCLE 1000
+#define BASETIME 300000
+#define DEFAULTWANTEDNUMBEROFPULSES MINPULSECOUNT
+#define PULSECOUNTSTEP 2
 
+//TODO: some of these shouldnt be viewable
 uint8_t state;
 uint16_t pulsecount;
 uint16_t dutycycle;
 uint16_t dutycyclestep;
-uint16_t pulsewidth;
-uint16_t wantedpulsewidth;
+//uint16_t pulsewidth;
+//uint16_t wantedpulsewidth;
+uint8_t wantedmaxduty;
+uint16_t wantednumberofpulses;
 
 void motordriver_init(void);
 

@@ -24,6 +24,7 @@ typedef struct
     uint16_t pin;
 } PINS;
 
+//Pins to be PWMed (used for current/voltage control)
 PINS PWMpins[NUMBEROFPINS] =
 {
     { GPIO_PORT_P2, GPIO_PIN4 },
@@ -31,11 +32,16 @@ PINS PWMpins[NUMBEROFPINS] =
     { GPIO_PORT_P5, GPIO_PIN6 }
 };
 
+//Pins to be only toggled
 PINS pins[NUMBEROFPINS] =
 {
     { GPIO_PORT_P2, GPIO_PIN0 },
     { GPIO_PORT_P2, GPIO_PIN2 },
-    { GPIO_PORT_P2, GPIO_PIN1 } };
+    { GPIO_PORT_P2, GPIO_PIN1 }
+};
+
+uint16_t numberofpulses;
+
 
 inline void pwmControl(PINS* pin);
 inline void incrementTimerCompare(uint16_t increment);
@@ -85,8 +91,11 @@ void motordriver_init(void)
     pulsecount = 0;
     dutycycle = INITIALDUTYCYCLE;
     dutycyclestep = DEFAULTDUTYCYCLESTEP;
-    pulsewidth=MINPULSEWIDTH;
-    wantedpulsewidth=MAXPULSEWIDTH;
+//    pulsewidth=SLOWPULSEWIDTH;
+//    wantedpulsewidth=FASTPULSEWIDTH;
+    wantedmaxduty=MAXDUTYCYCLE;
+    wantednumberofpulses=DEFAULTWANTEDNUMBEROFPULSES;
+    numberofpulses=MAXPULSECOUNT;
 
     //enable interrupts
     MAP_Interrupt_enableInterrupt(INT_TA0_N);
@@ -102,8 +111,7 @@ void TA0_N_IRQHandler(void)
     uint32_t status = MAP_Timer_A_getCaptureCompareEnabledInterruptStatus(
             TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_1);
     MAP_Timer_A_clearInterruptFlag(TIMER_A0_BASE);
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE,
-    TIMER_A_CAPTURECOMPARE_REGISTER_1);
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_1);
 
     switch (state)
     {
@@ -148,11 +156,10 @@ void TA0_N_IRQHandler(void)
 
 inline void pwmControl(PINS* pin)
 {
-    if (pulsecount
-            >= (MAXPULSECOUNT - 1 - 2 * dutycycle / DEFAULTDUTYCYCLESTEP))
+    if (pulsecount >=(numberofpulses+1-2*dutycycle/dutycyclestep) )
     { //bring pwm back down before change in state
         dutycyclestep = -abs(dutycyclestep);
-        dutycycle += dutycyclestep;
+//        dutycycle += dutycyclestep;
     }
     //set pin
     if (dutycycle <= 0)
@@ -160,70 +167,73 @@ inline void pwmControl(PINS* pin)
         MAP_GPIO_setOutputLowOnPin(pin->port, pin->pin);
         pulsecount += 2;
 //        dutycyclestep = abs(dutycyclestep);
-        incrementTimerCompare(pulsewidth);
+        incrementTimerCompare(PULSEWIDTH);
         dutycycle += dutycyclestep;
     }
     else if (dutycycle >= MAXDUTYCYCLE)
     {
         MAP_GPIO_setOutputHighOnPin(pin->port, pin->pin);
         pulsecount += 2;
-        incrementTimerCompare(pulsewidth);
-
+        incrementTimerCompare(PULSEWIDTH);
+        dutycycle+=dutycyclestep;
     }
     else
     {
         if (isOdd(pulsecount))
-        { //high
-            MAP_GPIO_setOutputHighOnPin(pin->port, pin->pin);
-            uint64_t increment = dutycycle * pulsewidth / MAXDUTYCYCLE;
-            incrementTimerCompare(increment);
-        }
-        else
         { //low
-
             MAP_GPIO_setOutputLowOnPin(pin->port, pin->pin);
-            uint64_t increment = (MAXDUTYCYCLE - dutycycle)
-                    * pulsewidth / MAXDUTYCYCLE;
+//          turn into one line
+            uint64_t increment = (MAXDUTYCYCLE - dutycycle)* PULSEWIDTH / MAXDUTYCYCLE;
             incrementTimerCompare(increment);
             dutycycle += dutycyclestep;
+        }
+        else
+        { //high
+
+            MAP_GPIO_setOutputHighOnPin(pin->port, pin->pin);
+            //turn into one line
+            uint64_t increment = PULSEWIDTH * dutycycle / MAXDUTYCYCLE;
+            incrementTimerCompare(increment);
+
         }
         pulsecount++;
     }
 
-    //glue logic for state change
-    if (pulsecount >= MAXPULSECOUNT)
+    //logic for state change and currently motor ramping
+    if (pulsecount >= numberofpulses)
     {
-        //put in its own function!!!
+        //TODO: put in its own function!!!
         //speed up motor
-        int16_t delta = wantedpulsewidth - pulsewidth;
+        int16_t delta = wantednumberofpulses - numberofpulses;
         if (delta != 0)
         {
-            if (abs(delta) <= MINDELTAPULSEWIDTHSTEP)
+            if (abs(delta) <= PULSECOUNTSTEP)
             {
-                pulsewidth = wantedpulsewidth;
+                numberofpulses = wantednumberofpulses;
             }
             else
             {
                 if (delta < 0)
                 {
-                    pulsewidth -= MINDELTAPULSEWIDTHSTEP;
+                    numberofpulses -= PULSECOUNTSTEP;
                 }
                 else
                 {
-                    pulsewidth += MINDELTAPULSEWIDTHSTEP;
+                    numberofpulses += PULSECOUNTSTEP;
                 }
             }
         }
         //check limits
-        if (pulsewidth < MAXPULSEWIDTH)
+        if (numberofpulses < MINPULSECOUNT)
         {
-            pulsewidth = MAXPULSEWIDTH;
+            numberofpulses = MINPULSECOUNT;
         }
-        else if (pulsewidth > MINPULSEWIDTH)
+        else if (numberofpulses > MAXPULSECOUNT)
         {
-            pulsewidth = MINPULSEWIDTH;
+            numberofpulses = MAXPULSECOUNT;
         }
 
+        //reset values for next state
         pulsecount = 0;
         dutycycle = INITIALDUTYCYCLE;
         dutycyclestep = DEFAULTDUTYCYCLESTEP;
@@ -237,8 +247,6 @@ inline void pwmControl(PINS* pin)
 
 inline void incrementTimerCompare(uint16_t increment)
 {
-    Timer_A_setCompareValue(TIMER_A0_BASE,
-    TIMER_A_CAPTURECOMPARE_REGISTER_1,
-    Timer_A_getCounterValue(TIMER_A0_BASE) + increment);
+    Timer_A_setCompareValue(TIMER_A0_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_1,Timer_A_getCounterValue(TIMER_A0_BASE) + increment);
 }
 
